@@ -7,8 +7,19 @@ from django.db.models import Count
 class TagQuerySet(models.QuerySet):
 
     def popular(self):
-        most_popular_tags = self.annotate(num_post=Count('posts')).order_by('-num_post')
-        return most_popular_tags
+        popular_posts = self.annotate(num_post=Count('posts')).order_by('-num_post')
+        return popular_posts
+    
+
+    def fetch_with_tags_count(self):
+        most_popular_tags_ids = [tag.id for tag in self]
+        posts_with_tags = Post.objects.filter(
+            id__in=most_popular_tags_ids).annotate(tags_count=Count('tags'))
+        ids_and_tags = posts_with_tags.values_list('id', 'posts_count')
+        count_for_id = dict(ids_and_tags)
+        for tag in count_for_id:
+            tag.posts_count = count_for_id[tag.id]
+        return self
 
 
 class PostQuerySet(models.QuerySet):
