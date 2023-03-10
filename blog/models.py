@@ -44,8 +44,7 @@ class Post(models.Model):
     text = models.TextField('Текст')
     slug = models.SlugField('Название в виде url', max_length=200)
     image = models.ImageField('Картинка')
-    published_at = models.DateTimeField('Дата и время публикации')
-    objects = PostQuerySet.as_manager()
+    published_at = models.DateTimeField('Дата и время публикации')    
 
     author = models.ForeignKey(
         User,
@@ -61,17 +60,18 @@ class Post(models.Model):
         'Tag',
         related_name='posts',
         verbose_name='Теги')
+    objects = PostQuerySet.as_manager()
+
+    class Meta:
+        ordering = ['-published_at']
+        verbose_name = 'пост'
+        verbose_name_plural = 'посты'
 
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
         return reverse('post_detail', args={'slug': self.slug})
-
-    class Meta:
-        ordering = ['-published_at']
-        verbose_name = 'пост'
-        verbose_name_plural = 'посты'
 
 
 class Tag(models.Model):
